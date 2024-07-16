@@ -9,13 +9,30 @@ export default function Game() {
   const [playGame, setPlayGame] = useState(false);
   const [player1, setPlayer1] = useState('');
   const [player2, setPlayer2] = useState('');
-  const [currentPlayer, setCurrentPlayer] = useState('');
+  const [currentPlayer, setCurrentPlayer] = useState('X');
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
   const [player1Board, setPlayer1Board] = useState([]);
   const [player2Board, setPlayer2Board] = useState([]);
 
   const toast = useToast();
+
+  const handleBoxClick = (index) => {
+    // If the box is already filled, return early
+    if (board[index] !== '') return;
+
+    // Update the board with the current player's move
+    const newBoard = [...board];
+    newBoard[index] = currentPlayer;
+    setBoard(newBoard);
+
+    // Switch to the next player
+    setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
+  };
+
+  useEffect(() => {
+    console.log("board", board);
+  }, [board])
 
   if (playGame === false) {
     return (
@@ -59,7 +76,6 @@ export default function Game() {
                     isClosable: true,
                   });
                 } else {
-                  setCurrentPlayer(player1);
                   setPlayGame(true);
                 }
               }}
@@ -93,7 +109,7 @@ export default function Game() {
 
             <Box p={4} display="flex" justifyContent="center" alignItems="center">
               <Grid templateColumns="repeat(3, 150px)" templateRows="repeat(3, 150px)" gap={0}>
-                {board.map((_, index) => (
+                {board.map((item, index) => (
                   <Box
                     key={index}
                     width="150px"
@@ -106,8 +122,9 @@ export default function Game() {
                     fontSize="3xl"
                     fontWeight="bold"
                     _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    onClick={() => handleBoxClick(index)}
                   >
-                    <Text>{/* X or O will go here */}</Text>
+                    <Text color={item === "X" ? "black" : "red.500"} fontSize="6xl">{item}</Text>
                   </Box>
                 ))}
               </Grid>
