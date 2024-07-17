@@ -28,7 +28,7 @@ export default function MainPage() {
   return (
     <Box height="80vh">
       {
-        games && (
+        games.length > 0 && (
           <Center>
             <Box mt={12}>
               <Text fontSize="3xl" fontWeight="bold" color="red.500">Previous Game Data</Text>
