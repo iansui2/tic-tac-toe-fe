@@ -1,12 +1,12 @@
-import httpname from "./axios/http-ptrax";
+import httpname from "./axios/http-game";
 
 class GameAPI {
     getGames() {
-        return httpname.get('/getGames');
+        return httpname.get('/game/getGames');
     }
 
     createGame(data) {
-        return httpname.post('/createGame', data);
+        return httpname.post('/game/createGame', data);
     }
 }
 

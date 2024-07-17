@@ -3,6 +3,8 @@
 
 import { Box, Center, Text, Input, Button, Grid, HStack, VStack, Spacer, Container, useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
+import GameService from "../../services/game.service.js"
 
 export default function Game() {
   const [board, setBoard] = useState(['', '', '', '', '', '', '', '', '']);
@@ -10,35 +12,144 @@ export default function Game() {
   const [player1, setPlayer1] = useState('');
   const [player2, setPlayer2] = useState('');
   const [currentPlayer, setCurrentPlayer] = useState('X');
+  const [round, setRound] = useState(1);
+  const [rounds, setRounds] = useState([]);
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
   const [player1Board, setPlayer1Board] = useState([]);
   const [player2Board, setPlayer2Board] = useState([]);
+  const [winner, setWinner] = useState(null);
+
+  const router = useRouter();
 
   const toast = useToast();
 
+  const winningCombinations = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
   const handleBoxClick = (index) => {
-    // If the box is already filled, return early
-    if (board[index] !== '') return;
+    // If the game has already been won or the box is already filled, return early
+    if (board[index] !== '' || winner === "X" || winner === 'O') return;
 
     // Update the board with the current player's move
     const newBoard = [...board];
     newBoard[index] = currentPlayer;
     setBoard(newBoard);
 
+    // Update the player's positions
+    let newPlayerBoard;
+    let winDetected = false;
+
+    if (currentPlayer === 'X') {
+        newPlayerBoard = [...player1Board, index];
+        setPlayer1Board(newPlayerBoard);
+        if (checkWin(newPlayerBoard)) {
+            setWinner('X');
+            setPlayer1Score(player1Score + 1);
+            winDetected = true;
+        }
+    } else {
+        newPlayerBoard = [...player2Board, index];
+        setPlayer2Board(newPlayerBoard);
+        if (checkWin(newPlayerBoard)) {
+            setWinner('O');
+            setPlayer2Score(player2Score + 1);
+            winDetected = true;
+        }
+    }
+
+    if (winDetected) {
+        setTimeout(() => {
+          updateRounds(newBoard, player1Board, player2Board, player1Score, player2Score);
+        }, 1500);
+        return;
+    }
+
+    // Check for a tie if there's no winner
+    if (checkTie(newBoard)) {
+      setWinner('-'); // No winner
+      updateRounds(newBoard, player1Board, player2Board, player1Score, player2Score);
+      return;
+    }
+
     // Switch to the next player
     setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
   };
 
-  useEffect(() => {
-    console.log("board", board);
-  }, [board])
+  const checkWin = (playerBoard) => {
+    return winningCombinations.some((combination) =>
+      combination.every((index) => playerBoard.includes(index))
+    );
+  };
+
+  const checkTie = (playerBoard) => {
+    return playerBoard.every((box) => box !== '') && !winner;
+  };
+
+  const updateRounds = (currentBoard, player1Positions, player2Positions, p1Score, p2Score) => {
+    const roundPlay = [...rounds, {
+        board: currentBoard,
+        player1Hits: player1Positions,
+        player2Hits: player2Positions,
+        player1Score: p1Score,
+        player2Score: p2Score,
+        round: round,
+        winner: winner === "-" ? "No Winner" : winner === "X" ? `Player 1: ${player1}` : `Player 2: ${player2}`
+    }];
+    setRounds(roundPlay);
+ };
+
+  const continueGame = () => {
+    setRound(round+1);
+    setBoard(['', '', '', '', '', '', '', '', '']);
+    setPlayer1Board([]);
+    setPlayer2Board([]);
+    setCurrentPlayer(winner === "X" ? "X" : "O");
+    setWinner(null);
+  }
+
+  const stopGame = () => {
+    const gameData = {
+      player1Name: player1,
+      player2Name: player2,
+      player1Score: player1Score,
+      player2Score: player2Score,
+      rounds: rounds,
+      round: round
+    };
+
+    GameService.createGame(gameData)
+      .then((response) => {
+        if (response.data?.message === "Game Added Successfully!") {
+          toast({
+            title: 'Game Succesfully Saved',
+            description: "Game is successfully saved!",
+            status: 'success',
+            duration: 9000,
+            isClosable: true,
+          });
+
+          router.push('/');
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   if (playGame === false) {
     return (
       <Center height="80vh">
         <Box width="500px">
-          <Text fontSize="2xl" fontWeight="bold" color="red" mt={12} mb={4}>Player 1</Text>
+          <Text fontSize="2xl" fontWeight="bold" color="red.500" mt={12} mb={4}>Player 1</Text>
           <Input 
             placeholder="Player 1" 
             mb={16} 
@@ -46,7 +157,7 @@ export default function Game() {
             size="lg" 
             onChange={(e) => setPlayer1(e.target.value)} 
           />
-          <Text fontSize="2xl" fontWeight="bold" color="red" mb={4}>Player 2</Text>
+          <Text fontSize="2xl" fontWeight="bold" color="red.500" mb={4}>Player 2</Text>
           <Input 
             placeholder="Player 2" 
             mb={32} 
@@ -80,7 +191,7 @@ export default function Game() {
                 }
               }}
             >
-              Next
+              Start
             </Button>
           </Center>
         </Box>
@@ -101,12 +212,56 @@ export default function Game() {
               </VStack>
               <Spacer />
               <VStack align="center">
+                <Text fontSize="2xl" fontWeight="bold" color="red.500">Round</Text>
+                <Text fontSize="xl" fontWeight="bold">{round}</Text>
+              </VStack>
+              <Spacer />
+              <VStack align="center">
                 <Text fontSize="2xl" fontWeight="bold" color="red.500">Player 2</Text>
                 <Text fontSize="xl" fontWeight="bold">{player2}</Text>
                 <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
               </VStack>
             </HStack>
-
+            {
+              winner &&
+                <HStack spacing={8} width="100%" mb={8}>
+                  <Button
+                    _hover={{ bg: 'red.300', transform: 'scale(1.05)', transition: 'all 300ms ease' }}
+                    _active={{ bg: 'red.300' }}
+                    _focus={{ borderColor: 'red.400' }} 
+                    bg="red.500"
+                    color="white" 
+                    size="lg" 
+                    borderRadius="lg"
+                    width="120px"
+                    height="80px"
+                    fontSize="xl"
+                    onClick={() => continueGame()}
+                  >
+                    Continue
+                  </Button>
+                  <Spacer />
+                  <VStack align="center">
+                    <Text fontSize="2xl" fontWeight="bold" color="green.500">{winner === "-" ? "No One Wins. It's a Tie!" : winner === "X" ? `The Winner is Player 1: ${player1}` : `The Winner is Player 2: ${player2}`}</Text>
+                  </VStack>
+                  <Spacer />
+                  <Button
+                    _hover={{ bg: 'red.300', transform: 'scale(1.05)', transition: 'all 300ms ease' }}
+                    _active={{ bg: 'red.300' }}
+                    _focus={{ borderColor: 'red.400' }} 
+                    bg="red.500"
+                    color="white" 
+                    size="lg" 
+                    borderRadius="lg"
+                    width="120px"
+                    height="80px"
+                    fontSize="xl"
+                    onClick={() => stopGame()}
+                  >
+                    Stop
+                  </Button>
+                </HStack>
+            }
             <Box p={4} display="flex" justifyContent="center" alignItems="center">
               <Grid templateColumns="repeat(3, 150px)" templateRows="repeat(3, 150px)" gap={0}>
                 {board.map((item, index) => (
