@@ -13,7 +13,6 @@ export default function MainPage() {
     GameService.getGames()
       .then((response) => {
         if (response.status === 200) {
-          console.log(response.data);
           setGames(response.data);
         }
       })

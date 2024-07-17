@@ -1,7 +1,7 @@
 // pages/game.js
 'use client'
 
-import { Box, Center, Text, Input, Button, Grid, HStack, VStack, Spacer, Container, useToast } from "@chakra-ui/react";
+import { Box, Center, Text, Input, Button, Grid, HStack, Stack, VStack, Spacer, Container, useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import GameService from "../../services/game.service.js"
@@ -36,7 +36,7 @@ export default function Game() {
   ];
 
   const handleBoxClick = (index) => {
-    // If the game has already been won or the box is already filled, return early
+    // Early return if the game has already been won or the box is filled
     if (board[index] !== '' || winner === "X" || winner === 'O') return;
 
     // Update the board with the current player's move
@@ -44,45 +44,50 @@ export default function Game() {
     newBoard[index] = currentPlayer;
     setBoard(newBoard);
 
-    // Update the player's positions
-    let newPlayerBoard;
+    // Update player boards and scores
+    let newPlayer1Board = [...player1Board];
+    let newPlayer2Board = [...player2Board];
+    let newPlayer1Score = player1Score;
+    let newPlayer2Score = player2Score;
     let winDetected = false;
 
     if (currentPlayer === 'X') {
-        newPlayerBoard = [...player1Board, index];
-        setPlayer1Board(newPlayerBoard);
-        if (checkWin(newPlayerBoard)) {
+        newPlayer1Board.push(index);
+        setPlayer1Board(newPlayer1Board);
+
+        if (checkWin(newPlayer1Board)) {
             setWinner('X');
-            setPlayer1Score(player1Score + 1);
+            newPlayer1Score += 1; // Corrected increment
+            setPlayer1Score(newPlayer1Score);
             winDetected = true;
         }
     } else {
-        newPlayerBoard = [...player2Board, index];
-        setPlayer2Board(newPlayerBoard);
-        if (checkWin(newPlayerBoard)) {
+        newPlayer2Board.push(index);
+        setPlayer2Board(newPlayer2Board);
+
+        if (checkWin(newPlayer2Board)) {
             setWinner('O');
-            setPlayer2Score(player2Score + 1);
+            newPlayer2Score += 1; // Corrected increment
+            setPlayer2Score(newPlayer2Score); // Corrected assignment
             winDetected = true;
         }
     }
 
     if (winDetected) {
-        setTimeout(() => {
-          updateRounds(newBoard, player1Board, player2Board, player1Score, player2Score);
-        }, 1500);
+        updateRounds(newBoard, newPlayer1Board, newPlayer2Board, newPlayer1Score, newPlayer2Score);
         return;
     }
 
     // Check for a tie if there's no winner
     if (checkTie(newBoard)) {
-      setWinner('-'); // No winner
-      updateRounds(newBoard, player1Board, player2Board, player1Score, player2Score);
-      return;
+        setWinner('-'); // No winner
+        updateRounds(newBoard, newPlayer1Board, newPlayer2Board, newPlayer1Score, newPlayer2Score);
+        return;
     }
 
     // Switch to the next player
     setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
-  };
+};
 
   const checkWin = (playerBoard) => {
     return winningCombinations.some((combination) =>
@@ -101,8 +106,7 @@ export default function Game() {
         player2Hits: player2Positions,
         player1Score: p1Score,
         player2Score: p2Score,
-        round: round,
-        winner: winner === "-" ? "No Winner" : winner === "X" ? `Player 1: ${player1}` : `Player 2: ${player2}`
+        round: round
     }];
     setRounds(roundPlay);
  };
@@ -148,7 +152,7 @@ export default function Game() {
   if (playGame === false) {
     return (
       <Center height="80vh">
-        <Box width="500px">
+        <Box width={{ base: "90%", sm: "500px" }}>
           <Text fontSize="2xl" fontWeight="bold" color="red.500" mt={12} mb={4}>Player 1</Text>
           <Input 
             placeholder="Player 1" 
@@ -206,7 +210,7 @@ export default function Game() {
           <Box>
             <HStack spacing={8} width="100%" mb={8}>
               <VStack align="center">
-                <Text fontSize="2xl" fontWeight="bold" color="red.500">Player 1</Text>
+                <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 1</Text>
                 <Text fontSize="xl" fontWeight="bold">{player1}</Text>
                 <Text fontSize="xl" fontWeight="bold">{player1Score}</Text>
               </VStack>
@@ -217,14 +221,14 @@ export default function Game() {
               </VStack>
               <Spacer />
               <VStack align="center">
-                <Text fontSize="2xl" fontWeight="bold" color="red.500">Player 2</Text>
+                <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 2</Text>
                 <Text fontSize="xl" fontWeight="bold">{player2}</Text>
                 <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
               </VStack>
             </HStack>
             {
               winner &&
-                <HStack spacing={8} width="100%" mb={8}>
+                <Stack spacing={8} width="100%" mb={8} direction={{ base: "column", sm: "row" }}>
                   <Button
                     _hover={{ bg: 'red.300', transform: 'scale(1.05)', transition: 'all 300ms ease' }}
                     _active={{ bg: 'red.300' }}
@@ -233,7 +237,7 @@ export default function Game() {
                     color="white" 
                     size="lg" 
                     borderRadius="lg"
-                    width="120px"
+                    width={{ base: "100%", sm: "120px" }}
                     height="80px"
                     fontSize="xl"
                     onClick={() => continueGame()}
@@ -253,33 +257,39 @@ export default function Game() {
                     color="white" 
                     size="lg" 
                     borderRadius="lg"
-                    width="120px"
+                    width={{ base: "100%", sm: "120px" }}
                     height="80px"
                     fontSize="xl"
                     onClick={() => stopGame()}
                   >
                     Stop
                   </Button>
-                </HStack>
+                </Stack>
             }
             <Box p={4} display="flex" justifyContent="center" alignItems="center">
-              <Grid templateColumns="repeat(3, 150px)" templateRows="repeat(3, 150px)" gap={0}>
+              <Grid
+                templateColumns={{ base: "repeat(3, 100px)", sm: "repeat(3, 150px)" }}
+                templateRows={{ base: "repeat(3, 100px)", sm: "repeat(3, 150px)" }}
+                gap={0}
+              >
                 {board.map((item, index) => (
                   <Box
                     key={index}
-                    width="150px"
-                    height="150px"
+                    width={{ base: "100px", sm: "150px" }}
+                    height={{ base: "100px", sm: "150px" }}
                     border="2px"
                     borderColor="gray.300"
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
-                    fontSize="3xl"
+                    fontSize={{ base: "2xl", sm: "3xl" }}
                     fontWeight="bold"
                     _hover={{ bg: "gray.100", cursor: "pointer" }}
                     onClick={() => handleBoxClick(index)}
                   >
-                    <Text color={item === "X" ? "black" : "red.500"} fontSize="6xl">{item}</Text>
+                    <Text color={item === "X" ? "black" : "red.500"} fontSize={{ base: "4xl", sm: "6xl" }}>
+                      {item}
+                    </Text>
                   </Box>
                 ))}
               </Grid>
