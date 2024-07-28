@@ -8,6 +8,10 @@ class GameAPI {
     createGame(data) {
         return httpname.post('/game/createGame', data);
     }
+
+    deleteGame(id) {
+        return httpname.delete('/game/deleteGame', { data: { id: id } });
+    }
 }
 
 const gameAPIInstance = new GameAPI();

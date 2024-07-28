@@ -137,7 +137,7 @@ export default function Game() {
             title: 'Game Succesfully Saved',
             description: "Game is successfully saved!",
             status: 'success',
-            duration: 9000,
+            duration: 3000,
             isClosable: true,
           });
 
