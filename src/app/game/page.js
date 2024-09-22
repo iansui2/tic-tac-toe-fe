@@ -1,8 +1,11 @@
 // pages/game.js
 'use client'
 
-import { Box, Center, Text, Input, Button, Grid, HStack, Stack, VStack, Spacer, Container, useToast } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { 
+  Box, Center, Text, Input, Button, Grid, HStack, 
+  Stack, VStack, Spacer, Container, useToast, useBreakpointValue 
+} from "@chakra-ui/react";
+import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import GameService from "../../services/game.service.js"
 
@@ -19,6 +22,7 @@ export default function Game() {
   const [player1Board, setPlayer1Board] = useState([]);
   const [player2Board, setPlayer2Board] = useState([]);
   const [winner, setWinner] = useState(null);
+  const isMdOrLarger = useBreakpointValue({ base: false, md: true });
 
   const router = useRouter();
 
@@ -208,24 +212,46 @@ export default function Game() {
       {
         playGame === true && (
           <Box>
-            <HStack spacing={8} width="100%" mb={8}>
-              <VStack align="center">
-                <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 1</Text>
-                <Text fontSize="xl" fontWeight="bold">{player1}</Text>
-                <Text fontSize="xl" fontWeight="bold">{player1Score}</Text>
-              </VStack>
-              <Spacer />
-              <VStack align="center">
-                <Text fontSize="2xl" fontWeight="bold" color="red.500">Round</Text>
-                <Text fontSize="xl" fontWeight="bold">{round}</Text>
-              </VStack>
-              <Spacer />
-              <VStack align="center">
-                <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 2</Text>
-                <Text fontSize="xl" fontWeight="bold">{player2}</Text>
-                <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
-              </VStack>
-            </HStack>
+            {
+              isMdOrLarger ?
+                <HStack spacing={8} width="100%" mb={8}>
+                  <VStack align="center">
+                    <Text fontSize="xl" fontWeight="bold" color="red.500">Player 1</Text>
+                    <Text fontSize="xl" fontWeight="bold">{player1}</Text>
+                    <Text fontSize="xl" fontWeight="bold">{player1Score}</Text>
+                  </VStack>
+                  <Spacer />
+                  <VStack align="center">
+                    <Text fontSize="2xl" fontWeight="bold" color="red.500">Round</Text>
+                    <Text fontSize="xl" fontWeight="bold">{round}</Text>
+                  </VStack>
+                  <Spacer />
+                  <VStack align="center">
+                    <Text fontSize="xl" fontWeight="bold" color="red.500">Player 2</Text>
+                    <Text fontSize="xl" fontWeight="bold">{player2}</Text>
+                    <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
+                  </VStack>
+                </HStack> :
+                <VStack spacing={4} width="100%" mb={8}>
+                  <HStack spacing={8} width="100%">
+                    <VStack align="center">
+                      <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 1</Text>
+                      <Text fontSize="xl" fontWeight="bold">{player1}</Text>
+                      <Text fontSize="xl" fontWeight="bold">{player1Score}</Text>
+                    </VStack>
+                    <Spacer />
+                    <VStack align="center">
+                      <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 2</Text>
+                      <Text fontSize="xl" fontWeight="bold">{player2}</Text>
+                      <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
+                    </VStack>
+                  </HStack>
+                  <VStack align="center">
+                    <Text fontSize="2xl" fontWeight="bold" color="red.500">Round</Text>
+                    <Text fontSize="xl" fontWeight="bold">{round}</Text>
+                  </VStack>
+                </VStack>
+            }
             {
               winner &&
                 <Stack spacing={8} width="100%" mb={8} direction={{ base: "column", sm: "row" }}>
