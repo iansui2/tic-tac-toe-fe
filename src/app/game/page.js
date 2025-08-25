@@ -191,7 +191,7 @@ export default function Game() {
                     title: 'Missing Player Names',
                     description: "Please fill the players names",
                     status: 'warning',
-                    duration: 9000,
+                    duration: 3000,
                     isClosable: true,
                   });
                 } else {
@@ -217,7 +217,14 @@ export default function Game() {
                 <HStack spacing={8} width="100%" mb={8}>
                   <VStack align="center">
                     <Text fontSize="xl" fontWeight="bold" color="red.500">Player 1</Text>
-                    <Text fontSize="xl" fontWeight="bold">{player1}</Text>
+                    <Text 
+                      fontSize="xl" 
+                      fontWeight="bold"
+                      color="black"
+                      textDecoration={currentPlayer === 'X' ? 'underline' : 'none'}
+                    >
+                      {player1}
+                    </Text>
                     <Text fontSize="xl" fontWeight="bold">{player1Score}</Text>
                   </VStack>
                   <Spacer />
@@ -228,7 +235,14 @@ export default function Game() {
                   <Spacer />
                   <VStack align="center">
                     <Text fontSize="xl" fontWeight="bold" color="red.500">Player 2</Text>
-                    <Text fontSize="xl" fontWeight="bold">{player2}</Text>
+                    <Text 
+                      fontSize="xl" 
+                      fontWeight="bold"
+                      color="red.600"
+                      textDecoration={currentPlayer === 'O' ? 'underline' : 'none'}
+                    >
+                      {player2}
+                    </Text>
                     <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
                   </VStack>
                 </HStack> :
@@ -236,13 +250,27 @@ export default function Game() {
                   <HStack spacing={8} width="100%">
                     <VStack align="center">
                       <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 1</Text>
-                      <Text fontSize="xl" fontWeight="bold">{player1}</Text>
+                      <Text 
+                        fontSize="xl" 
+                        fontWeight="bold"
+                        color="black"
+                        textDecoration={currentPlayer === 'X' ? 'underline' : 'none'}
+                      >
+                        {player1}
+                      </Text>
                       <Text fontSize="xl" fontWeight="bold">{player1Score}</Text>
                     </VStack>
                     <Spacer />
                     <VStack align="center">
                       <Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight="bold" color="red.500">Player 2</Text>
-                      <Text fontSize="xl" fontWeight="bold">{player2}</Text>
+                      <Text 
+                        fontSize="xl" 
+                        fontWeight="bold"
+                        color="red.600"
+                        textDecoration={currentPlayer === 'O' ? 'underline' : 'none'}
+                      >
+                        {player2}
+                      </Text>
                       <Text fontSize="xl" fontWeight="bold">{player2Score}</Text>
                     </VStack>
                   </HStack>
